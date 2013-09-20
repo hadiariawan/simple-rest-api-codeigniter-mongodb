@@ -126,4 +126,9 @@ class Books extends CI_Controller {
 		}
 	}
 
+	public function just_echo($echo='')
+	{
+		return $echo;
+	}
+
 }
