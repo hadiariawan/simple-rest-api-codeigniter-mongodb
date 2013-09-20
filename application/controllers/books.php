@@ -17,9 +17,18 @@ class Books extends CI_Controller {
 		$this->load->view('welcome_message');
 	}
 
-	public function lists($offset='',$limit='')
+	public function lists($offset='',$limit='',$source='mongodb')
 	{
-		$books['books'] = $this->books_model->get_all_items($offset,$limit);
+		if($source == 'mongodb'){
+			$DataProvider = new MongoData($this,'books');
+		}else{
+			$DataProvider = new ExcelData($this);
+		}		
+
+		$this->load->model('data_model','',FALSE,$DataProvider);
+
+		$where = '';
+		$books['books'] = $this->data_model->get_items($where,$offset,$limit);
 
 		if(!$this->is_test){
 			header('Content-Type: application/json');
@@ -33,8 +42,12 @@ class Books extends CI_Controller {
 
 	public function show($book_id='')
 	{
+		// $DataProvider = new ExcelData($this);
+		$DataProvider = new MongoData($this,'books');
+		$this->load->model('data_model','',FALSE,$DataProvider);
+
 		$where['_id'] = new MongoId($book_id);
-		$books['book'] = $this->books_model->get_items($where);
+		$books['books'] = $this->data_model->get_items($where);
 		
 		if(!$this->is_test){
 			header('Content-Type: application/json');
@@ -49,16 +62,20 @@ class Books extends CI_Controller {
 	{
 		$is_valid = true;
 
-		// $books = array('title' => 'Book Title Test #' . rand(0,100) , 'author' => 'Hadi Ariawan');
+		// $book = array('title' => 'Book Title Test #' . rand(0,100) , 'author' => 'Hadi Ariawan');
 		$book = $this->input->post(null,true);
+
+		// $DataProvider = new ExcelData($this);
+		$DataProvider = new MongoData($this,'books');
+		$this->load->model('data_model','',FALSE,$DataProvider);
 
 		if(empty($book)){
 			$is_valid = false;
 		}else{
 			if(empty($book_id)){
-				$is_valid = $this->books_model->add($book);
+				$is_valid = $this->data_model->add_items($book);
 			}else{
-				$is_valid = $this->books_model->update($book,new MongoId($book_id));
+				$is_valid = $this->data_model->add_items($book,new MongoId($book_id));
 			}
 		}
 
@@ -81,10 +98,15 @@ class Books extends CI_Controller {
 
 	public function delete($book_id='')
 	{
+		// $DataProvider = new ExcelData($this);
+		$DataProvider = new MongoData($this,'books');
+		$this->load->model('data_model','',FALSE,$DataProvider);
+
 		if(empty($book_id)){
 			$is_valid = false;
 		}else{
-			$is_valid = $this->books_model->delete(new MongoId($book_id));
+			$where['_id'] = new MongoId($book_id);
+			$is_valid = $this->data_model->delete_items($where);
 		}
 
 		if($is_valid){

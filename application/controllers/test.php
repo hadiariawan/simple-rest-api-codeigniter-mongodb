@@ -37,7 +37,7 @@ class Test extends CI_Controller {
 		$this->unit->run( $this->obooks->update() , $success_result, 'adding new book', 'with no post parameter');
 		
 		
-		// print_r($this->unit->result());
+
 
 		print_r($this->unit->report());
 	}

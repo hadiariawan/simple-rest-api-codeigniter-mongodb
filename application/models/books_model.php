@@ -1,6 +1,6 @@
 <?php
     
-class Books_model extends CI_Model {
+class Books_model extends Kampret_Model {
 
     var $collection = 'books';
 
